@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +34,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _keypadShown = false;
+  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
+  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
+  void startDiscovery() {
+    _streamSubscription =
+        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
+      results.add(r);
+    });
+    _streamSubscription.onDone(() {
+      print(results);
+    });
+  }
 
   @override
   void initState() {
@@ -38,11 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> connectTV() async {
-    try {
-      setState(() async {});
-    } catch (e) {
-      print(e);
-    }
+    print(results);
   }
 
   @override
