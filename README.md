@@ -17,3 +17,7 @@ samples, guidance on mobile development, and a full API reference.
 "# remote-app-2021" 
 "# remote-app-2021" 
 "# remote-app-2021" 
+
+
+get gui from 
+https://github.com/aelshamy/flutter_samsung_remote
