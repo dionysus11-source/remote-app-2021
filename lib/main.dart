@@ -27,33 +27,77 @@ class SamgungRemoteController extends StatelessWidget {
   }
 }
 
+enum _DeviceAvailability {
+  no,
+  maybe,
+  yes,
+}
+
+class _DeviceWithAvailability extends BluetoothDevice {
+  BluetoothDevice device;
+  _DeviceAvailability availability;
+  int rssi;
+
+  _DeviceWithAvailability(this.device, this.availability, [this.rssi]);
+}
+
 class MyHomePage extends StatefulWidget {
+  final bool checkAvailability = true;
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _keypadShown = false;
-  bool isConnected = false;
-  List<BluetoothDiscoveryResult> results = List<BluetoothDiscoveryResult>();
-  StreamSubscription<BluetoothDiscoveryResult> _streamSubscription;
-  void startDiscovery() {
-    _streamSubscription =
+  bool isConnected = true;
+  StreamSubscription<BluetoothDiscoveryResult> _discoveryStreamSubscription;
+  List<_DeviceWithAvailability> devices = List<_DeviceWithAvailability>();
+  void _startDiscovery() {
+    _discoveryStreamSubscription =
         FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      results.add(r);
+      setState(() {
+        Iterator i = devices.iterator;
+        while (i.moveNext()) {
+          var _device = i.current;
+          if (_device.device == r.device) {
+            _device.availability = _DeviceAvailability.yes;
+            _device.rssi = r.rssi;
+          }
+        }
+      });
     });
-    _streamSubscription.onDone(() {
-      print(results);
+
+    _discoveryStreamSubscription.onDone(() {
+      setState(() {
+        isConnected = true;
+      });
     });
   }
 
   @override
   void initState() {
     super.initState();
+    _startDiscovery();
+    FlutterBluetoothSerial.instance
+        .getBondedDevices()
+        .then((List<BluetoothDevice> bondedDevices) {
+      setState(() {
+        devices = bondedDevices
+            .map(
+              (device) => _DeviceWithAvailability(
+                device,
+                widget.checkAvailability
+                    ? _DeviceAvailability.maybe
+                    : _DeviceAvailability.yes,
+              ),
+            )
+            .toList();
+      });
+    });
   }
 
   Future<void> connectTV() async {
-    print(results);
+    print(devices);
   }
 
   @override
