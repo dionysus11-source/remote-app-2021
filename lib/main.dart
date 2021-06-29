@@ -1,9 +1,10 @@
 import 'dart:async';
-
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:typed_data';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,13 @@ class SamgungRemoteController extends StatelessWidget {
       ),
     );
   }
+}
+
+class _Message {
+  int whom;
+  String text;
+
+  _Message(this.whom, this.text);
 }
 
 enum _DeviceAvailability {
@@ -49,55 +57,130 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _keypadShown = false;
-  bool isConnected = true;
-  StreamSubscription<BluetoothDiscoveryResult> _discoveryStreamSubscription;
-  List<_DeviceWithAvailability> devices = List<_DeviceWithAvailability>();
-  void _startDiscovery() {
-    _discoveryStreamSubscription =
-        FlutterBluetoothSerial.instance.startDiscovery().listen((r) {
-      setState(() {
-        Iterator i = devices.iterator;
-        while (i.moveNext()) {
-          var _device = i.current;
-          if (_device.device == r.device) {
-            _device.availability = _DeviceAvailability.yes;
-            _device.rssi = r.rssi;
-          }
-        }
-      });
-    });
-
-    _discoveryStreamSubscription.onDone(() {
-      setState(() {
-        isConnected = true;
-      });
-    });
-  }
+  BluetoothConnection connection;
+  bool isConnecting = true;
+  bool get isConnected => connection != null && connection.isConnected;
+  bool isDisconnecting = false;
+  List<_Message> messages = List<_Message>();
+  String _messageBuffer = '';
+  final address = "00:20:12:08:92:A1";
+  static final clientID = 0;
 
   @override
   void initState() {
     super.initState();
-    _startDiscovery();
-    FlutterBluetoothSerial.instance
-        .getBondedDevices()
-        .then((List<BluetoothDevice> bondedDevices) {
+    connectBT();
+  }
+
+  @override
+  void dispose() {
+    // Avoid memory leak (`setState` after dispose) and disconnect
+    if (isConnected) {
+      isDisconnecting = true;
+      connection.dispose();
+      connection = null;
+    }
+    print("dispose is called");
+    super.dispose();
+  }
+
+  void connectBT() {
+    BluetoothConnection.toAddress(address).then((_connection) {
+      print('Connected to the device');
+      connection = _connection;
       setState(() {
-        devices = bondedDevices
-            .map(
-              (device) => _DeviceWithAvailability(
-                device,
-                widget.checkAvailability
-                    ? _DeviceAvailability.maybe
-                    : _DeviceAvailability.yes,
-              ),
-            )
-            .toList();
+        isConnecting = false;
+        isDisconnecting = false;
       });
+
+      connection.input.listen(_onDataReceived).onDone(() {
+        // Example: Detect which side closed the connection
+        // There should be `isDisconnecting` flag to show are we are (locally)
+        // in middle of disconnecting process, should be set before calling
+        // `dispose`, `finish` or `close`, which all causes to disconnect.
+        // If we except the disconnection, `onDone` should be fired as result.
+        // If we didn't except this (no flag set), it means closing by remote.
+        if (isDisconnecting) {
+          print('Disconnecting locally!');
+        } else {
+          print('Disconnected remotely!');
+        }
+        if (this.mounted) {
+          setState(() {});
+        }
+      });
+    }).catchError((error) {
+      print('Cannot connect, exception occured');
+      print(error);
     });
   }
 
-  Future<void> connectTV() async {
-    print(devices);
+  void _onDataReceived(Uint8List data) {
+    // Allocate buffer for parsed data
+    int backspacesCounter = 0;
+    data.forEach((byte) {
+      if (byte == 8 || byte == 127) {
+        backspacesCounter++;
+      }
+    });
+    Uint8List buffer = Uint8List(data.length - backspacesCounter);
+    int bufferIndex = buffer.length;
+
+    // Apply backspace control character
+    backspacesCounter = 0;
+    for (int i = data.length - 1; i >= 0; i--) {
+      if (data[i] == 8 || data[i] == 127) {
+        backspacesCounter++;
+      } else {
+        if (backspacesCounter > 0) {
+          backspacesCounter--;
+        } else {
+          buffer[--bufferIndex] = data[i];
+        }
+      }
+    }
+
+    // Create message if there is new line character
+    String dataString = String.fromCharCodes(buffer);
+    print(dataString);
+    int index = buffer.indexOf(13);
+    if (~index != 0) {
+      setState(() {
+        messages.add(
+          _Message(
+            1,
+            backspacesCounter > 0
+                ? _messageBuffer.substring(
+                    0, _messageBuffer.length - backspacesCounter)
+                : _messageBuffer + dataString.substring(0, index),
+          ),
+        );
+        _messageBuffer = dataString.substring(index);
+      });
+    } else {
+      _messageBuffer = (backspacesCounter > 0
+          ? _messageBuffer.substring(
+              0, _messageBuffer.length - backspacesCounter)
+          : _messageBuffer + dataString);
+    }
+  }
+
+  void _sendMessage(String text) async {
+    text = text.trim();
+
+    if (text.length > 0) {
+      try {
+        connection.output.add(utf8.encode(text + "\r\n"));
+        await connection.output.allSent;
+
+        setState(() {
+          messages.add(_Message(clientID, text));
+        });
+      } catch (e) {
+        // Ignore error, but notify state
+        setState(() {});
+      }
+    }
   }
 
   @override
@@ -115,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.cast, size: 30, color: Colors.cyan),
-                        onPressed: connectTV,
+                        onPressed: connectBT,
                       ),
                       IconButton(
                         icon: Icon(Icons.dialpad,
