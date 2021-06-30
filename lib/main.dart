@@ -57,6 +57,7 @@ Map<String, String> keycode = {
   'channelup': 'n',
   'airconpower': 'o',
   'airconmode': 'p',
+  'mute': 'q',
 };
 enum _KeyCode {
   poweron,
@@ -207,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (text.length > 0) {
       try {
-        connection.output.add(utf8.encode(text + "\r\n"));
+        connection.output.add(utf8.encode(text));
         await connection.output.allSent;
 
         //setState(() {
@@ -578,7 +579,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.volume_off,
                                   size: 20, color: Colors.white70),
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(keycode['mute']),
                             ),
                             MaterialButton(
                               height: 50,
