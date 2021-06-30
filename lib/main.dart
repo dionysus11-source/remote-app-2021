@@ -40,6 +40,24 @@ enum _DeviceAvailability {
   maybe,
   yes,
 }
+enum _KeyCode {
+  poweron,
+  smarthub,
+  external,
+  left,
+  right,
+  up,
+  down,
+  ok,
+  back,
+  exit,
+  volumeup,
+  volumedown,
+  channeldown,
+  channelup,
+  airconpower,
+  airconmode,
+}
 
 class _DeviceWithAvailability extends BluetoothDevice {
   BluetoothDevice device;
@@ -166,6 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _sendMessage(String text) async {
+    if (isConnected == false) return;
     text = text.trim();
 
     if (text.length > 0) {
@@ -198,7 +217,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.cast, size: 30, color: Colors.cyan),
-                        onPressed: connectBT,
+                        onPressed: isConnected ? null : () => connectBT(),
                       ),
                       IconButton(
                         icon: Icon(Icons.dialpad,
@@ -211,10 +230,10 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.power_settings_new,
-                            color: Colors.red, size: 30),
-                        onPressed: () async {},
-                      ),
+                          icon: Icon(Icons.power_settings_new,
+                              color: Colors.red, size: 30),
+                          onPressed: () =>
+                              _sendMessage(_KeyCode.poweron.index.toString())),
                     ],
                   ),
                   SizedBox(height: 50),
@@ -377,7 +396,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: ControllerButton(
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(
+                                  _KeyCode.smarthub.index.toString()),
                               child: Text(
                                 "SMART",
                                 style: TextStyle(
@@ -397,7 +417,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white54),
                               ),
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(
+                                  _KeyCode.external.index.toString()),
                             ),
                           ),
                           Align(
@@ -410,7 +431,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white54),
                               ),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.back.index.toString()),
                             ),
                           ),
                           Align(
@@ -423,7 +445,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white54),
                               ),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.exit.index.toString()),
                             ),
                           ),
                           Align(
@@ -436,7 +459,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white),
                               ),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.ok.index.toString()),
                             ),
                           ),
                           Align(
@@ -445,7 +469,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_drop_up,
                                   size: 30, color: Colors.white),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.up.index.toString()),
                             ),
                           ),
                           Align(
@@ -454,7 +479,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_drop_down,
                                   size: 30, color: Colors.white),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.down.index.toString()),
                             ),
                           ),
                           Align(
@@ -463,7 +489,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_right,
                                   size: 30, color: Colors.white),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.right.index.toString()),
                             ),
                           ),
                           Align(
@@ -472,7 +499,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_left,
                                   size: 30, color: Colors.white),
-                              onPressed: () async {},
+                              onPressed: () =>
+                                  _sendMessage(_KeyCode.left.index.toString()),
                             ),
                           ),
                         ],
@@ -488,7 +516,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 30,
                         child: ControllerButton(
                           color: Colors.red,
-                          onPressed: () async {},
+                          onPressed: () => _sendMessage(
+                              _KeyCode.airconpower.index.toString()),
                         ),
                       ),
                       SizedBox(
@@ -496,7 +525,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 30,
                         child: ControllerButton(
                           color: Colors.green,
-                          onPressed: () async {},
+                          onPressed: () => _sendMessage(
+                              _KeyCode.airconmode.index.toString()),
                         ),
                       ),
                       SizedBox(
@@ -531,7 +561,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_up,
                                   size: 20, color: Colors.white54),
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(
+                                  _KeyCode.volumeup.index.toString()),
                             ),
                             MaterialButton(
                               height: 50,
@@ -547,7 +578,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_down,
                                   size: 20, color: Colors.white54),
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(
+                                  _KeyCode.volumedown.index.toString()),
                             ),
                           ],
                         ),
@@ -563,7 +595,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white54),
                             ),
-                            onPressed: () async {},
+                            onPressed: () => _sendMessage(
+                                _KeyCode.volumedown.index.toString()),
                           ),
                           SizedBox(height: 35),
                           ControllerButton(
@@ -589,7 +622,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_up,
                                   size: 20, color: Colors.white54),
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(
+                                  _KeyCode.channelup.index.toString()),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -603,7 +637,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_down,
                                   size: 20, color: Colors.white54),
-                              onPressed: () async {},
+                              onPressed: () => _sendMessage(
+                                  _KeyCode.channeldown.index.toString()),
                             ),
                           ],
                         ),
