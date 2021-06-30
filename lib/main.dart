@@ -40,6 +40,24 @@ enum _DeviceAvailability {
   maybe,
   yes,
 }
+Map<String, String> keycode = {
+  'poweron': 'a',
+  'smarthub': 'b',
+  'external': 'c',
+  'left': 'd',
+  'right': 'e',
+  'up': 'f',
+  'down': 'g',
+  'ok': 'h',
+  'back': 'i',
+  'exit': 'j',
+  'volumeup': 'k',
+  'volumedown': 'l',
+  'channeldown': 'm',
+  'channelup': 'n',
+  'airconpower': 'o',
+  'airconmode': 'p',
+};
 enum _KeyCode {
   poweron,
   smarthub,
@@ -192,9 +210,9 @@ class _MyHomePageState extends State<MyHomePage> {
         connection.output.add(utf8.encode(text + "\r\n"));
         await connection.output.allSent;
 
-        setState(() {
-          messages.add(_Message(clientID, text));
-        });
+        //setState(() {
+        //  messages.add(_Message(clientID, text));
+        //});
       } catch (e) {
         // Ignore error, but notify state
         setState(() {});
@@ -232,8 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       IconButton(
                           icon: Icon(Icons.power_settings_new,
                               color: Colors.red, size: 30),
-                          onPressed: () =>
-                              _sendMessage(_KeyCode.poweron.index.toString())),
+                          onPressed: () => _sendMessage(keycode['poweron'])),
                     ],
                   ),
                   SizedBox(height: 50),
@@ -396,8 +413,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Align(
                             alignment: Alignment.topLeft,
                             child: ControllerButton(
-                              onPressed: () => _sendMessage(
-                                  _KeyCode.smarthub.index.toString()),
+                              onPressed: () =>
+                                  _sendMessage(keycode['smarthub']),
                               child: Text(
                                 "SMART",
                                 style: TextStyle(
@@ -417,8 +434,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white54),
                               ),
-                              onPressed: () => _sendMessage(
-                                  _KeyCode.external.index.toString()),
+                              onPressed: () =>
+                                  _sendMessage(keycode['external']),
                             ),
                           ),
                           Align(
@@ -431,8 +448,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white54),
                               ),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.back.index.toString()),
+                              onPressed: () => _sendMessage(keycode['back']),
                             ),
                           ),
                           Align(
@@ -445,8 +461,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white54),
                               ),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.exit.index.toString()),
+                              onPressed: () => _sendMessage(keycode['exit']),
                             ),
                           ),
                           Align(
@@ -459,8 +474,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white),
                               ),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.ok.index.toString()),
+                              onPressed: () => _sendMessage(keycode['ok']),
                             ),
                           ),
                           Align(
@@ -469,8 +483,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_drop_up,
                                   size: 30, color: Colors.white),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.up.index.toString()),
+                              onPressed: () => _sendMessage(keycode['up']),
                             ),
                           ),
                           Align(
@@ -479,8 +492,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_drop_down,
                                   size: 30, color: Colors.white),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.down.index.toString()),
+                              onPressed: () => _sendMessage(keycode['down']),
                             ),
                           ),
                           Align(
@@ -489,8 +501,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_right,
                                   size: 30, color: Colors.white),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.right.index.toString()),
+                              onPressed: () => _sendMessage(keycode['right']),
                             ),
                           ),
                           Align(
@@ -499,8 +510,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               borderRadius: 10,
                               child: Icon(Icons.arrow_left,
                                   size: 30, color: Colors.white),
-                              onPressed: () =>
-                                  _sendMessage(_KeyCode.left.index.toString()),
+                              onPressed: () => _sendMessage(keycode['left']),
                             ),
                           ),
                         ],
@@ -516,8 +526,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 30,
                         child: ControllerButton(
                           color: Colors.red,
-                          onPressed: () => _sendMessage(
-                              _KeyCode.airconpower.index.toString()),
+                          onPressed: () => _sendMessage(keycode['airconpower']),
                         ),
                       ),
                       SizedBox(
@@ -525,8 +534,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: 30,
                         child: ControllerButton(
                           color: Colors.green,
-                          onPressed: () => _sendMessage(
-                              _KeyCode.airconmode.index.toString()),
+                          onPressed: () => _sendMessage(keycode['airconmode']),
                         ),
                       ),
                       SizedBox(
@@ -561,8 +569,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_up,
                                   size: 20, color: Colors.white54),
-                              onPressed: () => _sendMessage(
-                                  _KeyCode.volumeup.index.toString()),
+                              onPressed: () =>
+                                  _sendMessage(keycode['volumeup']),
                             ),
                             MaterialButton(
                               height: 50,
@@ -578,8 +586,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_down,
                                   size: 20, color: Colors.white54),
-                              onPressed: () => _sendMessage(
-                                  _KeyCode.volumedown.index.toString()),
+                              onPressed: () =>
+                                  _sendMessage(keycode['volumedown']),
                             ),
                           ],
                         ),
@@ -595,8 +603,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white54),
                             ),
-                            onPressed: () => _sendMessage(
-                                _KeyCode.volumedown.index.toString()),
+                            onPressed: () =>
+                                _sendMessage(keycode['volumedown']),
                           ),
                           SizedBox(height: 35),
                           ControllerButton(
@@ -622,8 +630,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_up,
                                   size: 20, color: Colors.white54),
-                              onPressed: () => _sendMessage(
-                                  _KeyCode.channelup.index.toString()),
+                              onPressed: () =>
+                                  _sendMessage(keycode['channelup']),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -637,8 +645,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               shape: CircleBorder(),
                               child: Icon(Icons.keyboard_arrow_down,
                                   size: 20, color: Colors.white54),
-                              onPressed: () => _sendMessage(
-                                  _KeyCode.channeldown.index.toString()),
+                              onPressed: () =>
+                                  _sendMessage(keycode['channeldown']),
                             ),
                           ],
                         ),
